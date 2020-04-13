@@ -1,0 +1,81 @@
+id: eepdaniel_migrate_files
+
+label: 'Import images (as files)'
+
+migration_group: eepdaniel_migrate_articles
+
+source:
+  plugin: url
+  data_fetcher_plugin: http
+  data_parser_plugin: json
+
+  urls: http://eepdanieldev.prod.acquia-sites.com/jsonapi/file/file
+  item_selector: data/
+
+  ids:
+    id:
+      type: string
+
+  fields:
+    -
+      name: id
+      label: 'Id'
+      selector: /id
+    -
+      name: filename
+      label: 'Filename'
+      selector: /attributes/filename
+    -
+      name: sourcefile
+      label: 'Source file'
+      selector: /attributes/uri/url
+    -
+      name: filemime
+      label: 'Filemime'
+      selector: /attributes/filemime
+    -
+      name: status
+      label: 'Status'
+      selector: /attributes/status
+    -
+      name: description
+      label: 'Description'
+      selector: /attributes/description
+    
+    -
+      name: created
+      label: 'Created'
+      selector: /attributes/created
+
+  constants:
+    DRUPAL_FILE_DIRECTORY: 'public://images/'
+    source_domain: 'http://eepdanieldev.prod.acquia-sites.com'
+process:
+  pseudo_destination_filename: filename
+  pseudo_destination_path:
+    -
+      plugin: concat
+      source:
+        - constants/DRUPAL_FILE_DIRECTORY
+        - '@pseudo_destination_filename'
+  pseudo_source_filepath:
+    -
+      plugin: concat
+      source:
+        - constants/source_domain
+        - sourcefile
+  uri:
+    -
+      plugin: skip_on_empty
+      method: process
+      source: '@pseudo_source_filepath'
+    -
+      plugin: file_copy
+      source:
+        - '@pseudo_source_filepath'
+        - '@pseudo_destination_path'
+      file_exists: replace
+      move: false
+destination:
+  plugin: 'entity:file'
+migration_dependencies: null
