@@ -1,0 +1,62 @@
+id: eepdaniel_migrate_article_categories
+label: Migrate all categories for news article nodes.
+migration_group: eepdaniel_migrate_articles
+
+source:
+  plugin: url
+  data_fetcher_plugin: http
+  data_parser_plugin: json
+
+  urls: http://eepdanieldev.prod.acquia-sites.com/jsonapi/taxonomy_term/categories
+  item_selector: data/
+
+  ids:
+    id:
+      type: string
+
+  fields:
+    -
+      name: id
+      label: 'Id'
+      selector: /id
+    -
+      name: name
+      label: 'Name'
+      selector: /attributes/name
+    -
+      name: weight
+      label: Weight
+      selector: /attributes/weight
+    -
+      name: status
+      label: Status
+      selector: /attributes/status
+    -
+      name: description
+      label: Description
+      selector: /attributes/description
+    -
+      name: created
+      label: Created
+      selector: /attributes/created
+
+destination:
+  plugin: entity:taxonomy_term
+process:
+  name: name
+  description: description
+  # The vocabulary into which we are migrating.
+  vid: 
+    type:
+    plugin: default_value
+    default_value: news_categories
+  weight: weight
+  status: status
+  created: created
+
+migration_dependencies: {}
+
+dependencies:
+  enforced:
+    module:
+      - eepdaniel_migrate
