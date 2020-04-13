@@ -1,0 +1,121 @@
+id: eepdaniel_migrate_import_article_nodes
+label: Import news articles from eepdanieldev
+migration_group: eepdaniel_migrate_articles
+migration_dependencies:
+  required:
+    - eepdaniel_migrate_article_categories
+    - eepdaniel_migrate_media
+
+dependencies:
+  enforced:
+    module:
+      - eepdaniel_migrate
+
+destination:
+  plugin: entity:node
+
+source:
+  plugin: url
+  data_fetcher_plugin: http
+  data_parser_plugin: json
+
+  urls: http://eepdanieldev.prod.acquia-sites.com/jsonapi/node/news_article
+
+  item_selector: data/
+
+  ids:
+    id:
+      type: string
+
+  fields:
+    -
+      name: id
+      label: 'Id'
+      selector: /id
+    -
+      name: title
+      label: 'Title'
+      selector: /attributes/title
+    -
+      name: created
+      label: 'Created'
+      selector: /attributes/created
+    -
+      name: changed
+      label: 'Changed'
+      selector: /attributes/changed
+    -
+      name: status
+      label: 'Status'
+      selector: /attributes/status
+    -
+      name: sticky
+      label: 'Sticky'
+      selector: /attributes/sticky
+    -
+      name: promote
+      label: 'Promote'
+      selector: /attributes/promote
+    -
+      name: default_langcode
+      label: 'Default Langcode'
+      selector: /attributes/default_langcode
+    -
+      name: path
+      label: 'Path'
+      selector: /attributes/path
+    -
+      name: body
+      label: 'Body'
+      selector: /attributes/body
+    -
+      name: field_cover_image
+      label: 'Featured image'
+      selector: /relationships/field_c
+    - 
+      name: field_categories
+      label: 'Categories'
+      selector: /relationships/field_categories/data
+
+process:
+  type:
+    plugin: default_value
+    default_value: article
+
+  title: title
+  created: created
+  changed: changed
+  status: status
+  sticky: sticky
+  promote: promote
+  default_language: default_language
+  path: path
+
+  body/value:
+    plugin: extract
+    source: body
+    index:
+      - value
+  body/format:
+    plugin: extract
+    source: body
+    index:
+      - format
+
+  field_featured_image:
+    plugin: migration
+    migration: eepdaniel_migrate_media
+    source: field_cover_image/data/id
+
+  field_tags:
+    plugin: sub_process
+    source: field_categories
+    process:
+      target_id:
+        plugin: migration_lookup
+        migration: eepdaniel_migrate_article_categories
+        source: id
+
+  uid:
+    plugin: default_value
+    default_value: 1
