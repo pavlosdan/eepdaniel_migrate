@@ -1,0 +1,5 @@
+name: Migration Example
+type: module
+description: 'Provides example of a migration from the eepdaniel site.'
+package: Custom
+core: 8.x
