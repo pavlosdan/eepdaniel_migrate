@@ -1,0 +1,35 @@
+# A "migration group" is - surprise! - a group of migrations. It is used to
+# group migrations for display by our tools, and to perform operations on a
+# specific set of migrations. It can also be used to hold any configuration
+# common to those migrations, so it doesn't have to be duplicated in each one.
+
+# The machine name of the group, by which it is referenced in individual
+# migrations.
+id: eepdaniel_migrate_articles
+# A human-friendly label for the group.
+label: Import News Articles
+# More information about the group.
+description: A few simple news article related imports, to demonstrate how to implement migrations.
+
+# Short description of the type of source, e.g. "Drupal 6" or "WordPress".
+source_type: 'JSON:API'
+
+# Here we add any default configuration settings to be shared among all
+# migrations in the group. For this example, the source tables are in the
+# Drupal (default) database, but usually if your source data is in a
+# database it will be external.
+shared_configuration:
+  # Specifying 'source' here means that this configuration will be merged into
+  # the 'source' configuration of each migration.
+  source:
+   plugin: url
+   data_fetcher_plugin: http
+   data_parser_plugin: json
+   urls: http://eepdanieldev.prod.acquia-sites.com/jsonapi/node/news_article
+
+# Add an enforced dependency so the migration_group configuration will be 
+# removed on module uninstall.
+dependencies:
+  enforced:
+    module:
+      - eepdaniel_migrate
